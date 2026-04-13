@@ -7,29 +7,42 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #F8F7F4; color: #037C36; font-family: sans-serif; text-align: center; padding: 20px; }
-        h1 { color: #037C36; font-size: 2.5rem; margin-bottom: 30px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
-        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .price { color: #C99100; font-weight: bold; font-size: 1.2rem; margin-top: 10px; }
+        h1 { color: #037C36; font-size: 2.5rem; margin-top: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 30px auto; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: left; }
+        .price { color: #C99100; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
     <h1>HEALTHY FARE</h1>
-    <div id="menu" class="grid">Загрузка меню...</div>
+    <div id="menu" class="grid">Загрузка...</div>
+
     <script>
-        const _supabase = supabase.createClient('https://xjhrlwmwbjkrkengmlbn.supabase.co', 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqaHJsd213YmprcmtlbmdtbGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxODIxMDUsImV4cCI6MjA5MDc1ODEwNX0.Ciff-5g3VuASwa4fKdMIsccCvgFVYhxGRk9szwvMtyA');
-        async function loadMenu() {
-            const { data, error } = await _supabase.from('dishes').select('*');
-            if (error) { document.getElementById('menu').innerHTML = 'Ошибка: ' + error.message; return; }
-            document.getElementById('menu').innerHTML = data.map(d => `
+        // Объединяем всё в одну команду, чтобы не было конфликтов
+        const client = supabase.createClient(
+            'https://xjhrlwmwbjkrkengmlbn.supabase.co', 
+            'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqaHJsd213YmprcmtlbmdtbGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxODIxMDUsImV4cCI6MjA5MDc1ODEwNX0.Ciff-5g3VuASwa4fKdMIsccCvgFVYhxGRk9szwvMtyA'
+        );
+
+        async function getMenu() {
+            const { data, error } = await client.from('dishes').select('*');
+            if (error) {
+                document.getElementById('menu').innerHTML = 'Ошибка: ' + error.message;
+                return;
+            }
+            if (!data || data.length === 0) {
+                document.getElementById('menu').innerHTML = 'База данных пуста';
+                return;
+            }
+            document.getElementById('menu').innerHTML = data.map(item => `
                 <div class="card">
-                    <h3>${d.title_ru || 'Без названия'}</h3>
-                    <p>${d.description_ru || ''}</p>
-                    <div class="price">${d.price || '0'} AED</div>
+                    <h3>${item.title_ru || 'Без названия'}</h3>
+                    <p>${item.description_ru || ''}</p>
+                    <div class="price">${item.price || '0'} AED</div>
                 </div>
             `).join('');
         }
-        loadMenu();
+        getMenu();
     </script>
 </body>
 </html>
