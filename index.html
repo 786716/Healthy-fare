@@ -13,27 +13,32 @@
     <h1>HEALTHY FARE</h1>
     <div id="menu">Загрузка...</div>
 
-    <script>
-        // Используем твой проверенный URL и Ключ прямо здесь
+        <script>
         const _supabase = supabase.createClient(
             'https://xjhrlwmwbjkrkengmlbn.supabase.co', 
-    'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqaHJsd213YmprcmtlbmdtbGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxODIxMDUsImV4cCI6MjA5MDc1ODEwNX0.Ciff-5g3VuASwa4fKdMIsccCvgFVYhxGRk9szwvMtyA';
+            'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqaHJsd213YmprcmtlbmdtbGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxODIxMDUsImV4cCI6MjA5MDc1ODEwNX0.Ciff-5g3VuASwa4fKdMIsccCvgFVYhxGRk9szwvMtyA'
         );
 
-        async function load() {
-            const { data, error } = await _supabase.from('dishes').select('*');
-            if (error) { 
-                document.getElementById('menu').innerHTML = 'Ошибка: ' + error.message; 
-                return; 
+        async function loadMenu() {
+            try {
+                const { data, error } = await _supabase.from('dishes').select('*');
+                if (error) throw error;
+                
+                const container = document.getElementById('menu');
+                if (!data || data.length === 0) {
+                    container.innerHTML = 'В таблице пока нет блюд';
+                    return;
+                }
+
+                container.innerHTML = data.map(d => `
+                    <div class="card">
+                        <h3>${d.title_ru || 'Без названия'}</h3>
+                        <p>${d.price ? d.price + ' AED' : 'Цена не указана'}</p>
+                    </div>
+                `).join('');
+            } catch (err) {
+                document.getElementById('menu').innerHTML = 'Ошибка: ' + err.message;
             }
-            document.getElementById('menu').innerHTML = data.map(d => `
-                <div class="card">
-                    <h3>${d.title_ru || 'Блюдо'}</h3>
-                    <p>ID: ${d.id}</p>
-                </div>
-            `).join('');
         }
-        load();
+        loadMenu();
     </script>
-</body>
-</html>
