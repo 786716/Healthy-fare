@@ -14,11 +14,7 @@
     <div id="menu">Загрузка...</div>
 
         <script>
-        const _supabase = supabase.createClient(
-            'https://xjhrlwmwbjkrkengmlbn.supabase.co', 
-            'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqaHJsd213YmprcmtlbmdtbGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxODIxMDUsImV4cCI6MjA5MDc1ODEwNX0.Ciff-5g3VuASwa4fKdMIsccCvgFVYhxGRk9szwvMtyA'
-        ;
-
+        const _supabase = supabase.createClient('https://xjhrlwmwbjkrkengmlbn.supabase.co', 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqaHJsd213YmprcmtlbmdtbGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxODIxMDUsImV4cCI6MjA5MDc1ODEwNX0.Ciff-5g3VuASwa4fKdMIsccCvgFVYhxGRk9szwvMtyA');
         async function loadMenu() {
             try {
                 const { data, error } = await _supabase.from('dishes').select('*');
