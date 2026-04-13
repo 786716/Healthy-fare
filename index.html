@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthy Fare | Delivery</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #F8F7F4; color: #037C36; font-family: sans-serif; margin: 0; padding: 20px; text-align: center; }
+        h1 { font-family: 'Abril Fatface', serif; font-size: 3rem; margin-bottom: 10px; }
+        .lang-switch { margin-bottom: 30px; }
+        button { background: #037C36; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; margin: 5px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .price { font-weight: bold; color: #C99100; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+    <h1>HEALTHY FARE</h1>
+    <div class="lang-switch">
+        <button onclick="setLang('ru')">RU</button>
+        <button onclick="setLang('en')">EN</button>
+    </div>
+    <div id="menu" class="grid">Загрузка меню...</div>
+
+    <script>
+        const supabase = supabase.createClient('https://xjhrlwmwbjkrkengmlbn.supabase.co', 'ВАШ_ANON_KEY_СЮДА');
+        let currentLang = 'ru';
+
+        async function loadMenu() {
+            const { data, error } = await supabase.from('dishes').select('*');
+            if (error) { console.log(error); return; }
+            render(data);
+        }
+
+        function render(dishes) {
+            const container = document.getElementById('menu');
+            container.innerHTML = dishes.map(d => `
+                <div class="card">
+                    <h3>${currentLang === 'ru' ? d.title_ru : d.title_en}</h3>
+                    <p>${currentLang === 'ru' ? d.description_ru : d.description_en}</p>
+                    <div class="price">$${d.price || '150'}</div>
+                </div>
+            `).join('');
+        }
+
+        function setLang(lang) { currentLang = lang; loadMenu(); }
+        loadMenu();
+    </script>
+</body>
+</html>
