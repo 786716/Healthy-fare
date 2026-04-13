@@ -6,129 +6,145 @@
     <title>Healthy Fare | Питание для профи</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --green: #037C36; --bg: #F8F7F4; }
-        body { margin: 0; font-family: sans-serif; background: var(--bg); color: #333; }
+        :root { --green: #037C36; --gold: #C99100; --bg: #F8F7F4; }
+        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); color: #333; transition: 0.3s; }
         
-        /* Шапка по ТЗ */
+        /* Шапка */
         header { 
             display: flex; justify-content: space-between; padding: 10px 15px; 
             background: white; align-items: center; border-bottom: 1px solid #ddd;
             position: sticky; top: 0; z-index: 1000;
         }
-        .nav-btn { background: #eee; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .nav-btn { background: #eee; border: none; padding: 10px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .lang-active { background: var(--green); color: white; }
 
-        /* Контентная часть */
-        .container { padding: 20px; max-width: 600px; margin: 0 auto; text-align: center; }
-        .main-logo { width: 150px; margin-bottom: 20px; }
+        /* Контент */
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; text-align: center; }
+        .logo-img { width: 140px; margin: 20px 0; }
         
-        /* Медиа-блок (Маленькие видео и фото по ТЗ) */
-        .media-group { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+        /* Видео и фото по ТЗ (маленькие) */
+        .media-row { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
         .media-item { 
-            width: 140px; height: 140px; background: #000; border-radius: 12px;
+            width: 150px; height: 150px; background: #000; border-radius: 15px;
             overflow: hidden; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        /* Описания */
-        .desc-text { line-height: 1.5; font-size: 1.1rem; margin: 20px 0; }
+        .description { font-size: 1.1rem; line-height: 1.5; margin: 20px 0; color: #444; }
 
-        /* Сеты - кнопки входа в меню */
-        .set-selector { 
-            background: white; border: 2px solid #ddd; border-radius: 15px; 
-            padding: 25px; margin: 15px 0; width: 100%; cursor: pointer;
-            font-size: 1.5rem; font-weight: bold; color: var(--green); transition: 0.2s;
+        /* Кнопки сетов */
+        .set-card { 
+            background: white; border: 2px solid #eee; border-radius: 20px; 
+            padding: 30px 20px; margin: 15px 0; width: 100%; cursor: pointer;
+            font-size: 1.6rem; font-weight: bold; color: var(--green);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: 0.2s;
         }
-        .set-selector:active { border-color: var(--green); background: #f0fff0; }
+        .set-card:active { transform: scale(0.98); border-color: var(--green); }
 
-        /* Сетка блюд (скрыта до выбора сета) */
-        #menu-view { display: none; padding: 20px; }
-        .dish-card { background: white; border-radius: 15px; margin-bottom: 20px; padding: 15px; text-align: left; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        /* Экран меню */
+        #menu-page { display: none; background: white; min-height: 100vh; position: fixed; top: 0; left: 0; width: 100%; z-index: 2000; overflow-y: auto; }
+        .back-btn { margin: 20px; padding: 10px 20px; background: #333; color: white; border: none; border-radius: 8px; }
+        .dish-card { border-bottom: 1px solid #eee; padding: 15px; text-align: left; }
     </style>
 </head>
 <body>
 
 <header>
-    <button class="nav-btn" onclick="openAdmin()">⚙️ Admin</button>
-    <div class="lang-group">
-        <button class="nav-btn" onclick="setLanguage('ru')">RU</button>
-        <button class="nav-btn" onclick="setLanguage('en')">EN</button>
+    <button class="nav-btn" onclick="checkAdmin()">⚙️</button>
+    <div id="lang-btns">
+        <button class="nav-btn" id="btn-ru" onclick="setLang('ru')">RU</button>
+        <button class="nav-btn" id="btn-en" onclick="setLang('en')">EN</button>
     </div>
     <button class="nav-btn">🛒 <span id="cart-count">0</span></button>
 </header>
 
-<div id="main-view" class="container">
-    <img src="https://healthy-fare.vercel.app/logo.png" class="main-logo" alt="Logo">
+<div id="home-page" class="container">
+    <img src="https://healthy-fare.vercel.app/logo.png" class="logo-img" alt="Logo">
+    
+    <div id="d1" class="description"></div>
 
-    <div id="desc-1" class="desc-text"></div>
-
-    <div class="media-group">
+    <div class="media-row">
         <div class="media-item">
-            <video width="100%" height="100%" controls><source src="video.mp4" type="video/mp4"></video>
+            <video width="100%" height="100%" poster="video-thumb.jpg"><source src="promo.mp4"></video>
         </div>
         <div class="media-item">
-            <img src="photo.jpg" style="width:100%; height:100%; object-fit: cover;">
+            <img src="photo.jpg" style="width:100%; height:100%; object-fit:cover;">
         </div>
     </div>
 
-    <div id="desc-2" class="desc-text" style="font-weight: bold;"></div>
+    <div id="d2" class="description" style="font-weight:bold;"></div>
 
-    <div id="sets-list">
-        <button class="set-selector" onclick="showMenu(1)">СЕТ 1</button>
-        <button class="set-selector" onclick="showMenu(2)">СЕТ 2</button>
-        <button class="set-selector" onclick="showMenu(3)">СЕТ 3</button>
+    <div style="margin-top: 30px;">
+        <button class="set-card" onclick="openSet(1)" id="s1"></button>
+        <button class="set-card" onclick="openSet(2)" id="s2"></button>
+        <button class="set-card" onclick="openSet(3)" id="s3"></button>
     </div>
 </div>
 
-<div id="menu-view" class="container">
-    <button onclick="backToMain()" style="margin-bottom:20px;">⬅ Назад</button>
-    <h2 id="selected-set-title"></h2>
-    <div id="dishes-container"></div>
+<div id="menu-page">
+    <button class="back-btn" onclick="closeMenu()">⬅ Назад</button>
+    <h1 id="menu-title" style="color:var(--green)"></h1>
+    <div id="dishes-list" class="container">
+        <p>Загрузка блюд...</p>
+    </div>
 </div>
 
 <script>
-    // ВСЕ ТЕКСТЫ ТУТ
-    const content = {
+    // ТЕКСТЫ ПО ТЗ (Просто поменяй их тут)
+    const data = {
         ru: {
-            d1: "ТВОЙ ТЕКСТ ОПИСАНИЯ 1 ИЗ ТЗ (ПРО ДАЛЬНОБОЙЩИКОВ)",
-            d2: "ТВОЙ ТЕКСТ ОПИСАНИЯ 2 ИЗ ТЗ (СУТЬ ПРОДАЖИ)",
-            s1: "СЕТ №1", s2: "СЕТ №2", s3: "СЕТ №3"
+            d1: "Горячее питание для тех, кто за рулем. Доставка к месту стоянки.",
+            d2: "Выбирай свой сет на сегодня. Всегда свежее и сытное.",
+            s1: "СЕТ №1", s2: "СЕТ №2", s3: "СЕТ №3",
+            admin_msg: "Введите пароль:"
         },
         en: {
-            d1: "YOUR DESCRIPTION 1 IN ENGLISH",
-            d2: "YOUR DESCRIPTION 2 IN ENGLISH",
-            s1: "SET #1", s2: "SET #2", s3: "SET #3"
+            d1: "Hot meals for professional drivers. Delivery to your parking spot.",
+            d2: "Choose your set for today. Always fresh and filling.",
+            s1: "SET #1", s2: "SET #2", s3: "SET #3",
+            admin_msg: "Enter password:"
         }
     };
 
-    let currentLang = 'ru';
+    let curLang = localStorage.getItem('lang') || 'ru';
 
-    function setLanguage(lang) {
-        currentLang = lang;
-        document.getElementById('desc-1').innerText = content[lang].d1;
-        document.getElementById('desc-2').innerText = content[lang].d2;
-        const buttons = document.querySelectorAll('.set-selector');
-        buttons[0].innerText = content[lang].s1;
-        buttons[1].innerText = content[lang].s2;
-        buttons[2].innerText = content[lang].s3;
+    function setLang(lang) {
+        curLang = lang;
+        localStorage.setItem('lang', lang);
+        
+        // Обновляем тексты
+        document.getElementById('d1').innerText = data[lang].d1;
+        document.getElementById('d2').innerText = data[lang].d2;
+        document.getElementById('s1').innerText = data[lang].s1;
+        document.getElementById('s2').innerText = data[lang].s2;
+        document.getElementById('s3').innerText = data[lang].s3;
+
+        // Кнопки
+        document.getElementById('btn-ru').className = lang === 'ru' ? 'nav-btn lang-active' : 'nav-btn';
+        document.getElementById('btn-en').className = lang === 'en' ? 'nav-btn lang-active' : 'nav-btn';
     }
 
-    function showMenu(setNum) {
-        document.getElementById('main-view').style.display = 'none';
-        document.getElementById('menu-view').style.display = 'block';
-        document.getElementById('selected-set-title').innerText = content[currentLang]['s' + setNum];
-        // Тут будет fetch из Supabase с фильтром по номеру сета
+    function checkAdmin() {
+        let pass = prompt(data[curLang].admin_msg);
+        if (pass === "777") { // ТВОЙ ПАРОЛЬ ТУТ
+            alert("Админка откроется в следующем обновлении");
+        } else {
+            alert("Ошибка");
+        }
     }
 
-    function backToMain() {
-        document.getElementById('main-view').style.display = 'block';
-        document.getElementById('menu-view').style.display = 'none';
+    function openSet(num) {
+        document.getElementById('menu-page').style.display = 'block';
+        document.getElementById('menu-title').innerText = data[curLang]['s' + num];
+        // Здесь будет функция loadFromSupabase(num);
     }
 
-    function openAdmin() {
-        if(prompt("Пароль:") === "123") { window.location.href = "/admin"; }
+    function closeMenu() {
+        document.getElementById('menu-page').style.display = 'none';
     }
 
     // Старт
-    setLanguage('ru');
+    setLang(curLang);
 </script>
 
 </body>
