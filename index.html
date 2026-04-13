@@ -3,108 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Healthy Fare</title>
+    <title>Healthy Fare | Питание для профи</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --green: #037C36; --gold: #C99100; --bg: #F8F7F4; }
-        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); text-align: center; }
+        :root { --green: #037C36; --bg: #F8F7F4; }
+        body { margin: 0; font-family: sans-serif; background: var(--bg); color: #333; }
         
-        /* Шапка */
-        header { display: flex; justify-content: space-between; padding: 15px; background: white; align-items: center; }
-        .nav-btn { background: none; border: 1px solid #ddd; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+        /* Шапка по ТЗ */
+        header { 
+            display: flex; justify-content: space-between; padding: 10px 15px; 
+            background: white; align-items: center; border-bottom: 1px solid #ddd;
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .nav-btn { background: #eee; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        /* Контент по ТЗ */
-        .container { padding: 20px; max-width: 800px; margin: 0 auto; }
-        .logo-main { width: 120px; margin: 20px 0; }
+        /* Контентная часть */
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; text-align: center; }
+        .main-logo { width: 150px; margin-bottom: 20px; }
         
-        .media-box { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
-        .media-item { width: 45%; aspect-ratio: 1; background: #eee; border-radius: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        
-        /* Сеты */
-        .sets-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 30px; }
-        .set-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; border: 2px solid transparent; }
-        .set-card:active { border-color: var(--green); }
+        /* Медиа-блок (Маленькие видео и фото по ТЗ) */
+        .media-group { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+        .media-item { 
+            width: 140px; height: 140px; background: #000; border-radius: 12px;
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Описания */
+        .desc-text { line-height: 1.5; font-size: 1.1rem; margin: 20px 0; }
+
+        /* Сеты - кнопки входа в меню */
+        .set-selector { 
+            background: white; border: 2px solid #ddd; border-radius: 15px; 
+            padding: 25px; margin: 15px 0; width: 100%; cursor: pointer;
+            font-size: 1.5rem; font-weight: bold; color: var(--green); transition: 0.2s;
+        }
+        .set-selector:active { border-color: var(--green); background: #f0fff0; }
+
+        /* Сетка блюд (скрыта до выбора сета) */
+        #menu-view { display: none; padding: 20px; }
+        .dish-card { background: white; border-radius: 15px; margin-bottom: 20px; padding: 15px; text-align: left; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
 <header>
-    <button class="nav-btn" onclick="openAdmin()">⚙️</button>
-    <div id="lang-toggle">
-        <button class="nav-btn" onclick="setLang('ru')">RU</button>
-        <button class="nav-btn" onclick="setLang('en')">EN</button>
+    <button class="nav-btn" onclick="openAdmin()">⚙️ Admin</button>
+    <div class="lang-group">
+        <button class="nav-btn" onclick="setLanguage('ru')">RU</button>
+        <button class="nav-btn" onclick="setLanguage('en')">EN</button>
     </div>
     <button class="nav-btn">🛒 <span id="cart-count">0</span></button>
 </header>
 
-<div class="container">
-    <img src="https://healthy-fare.vercel.app/logo.png" class="logo-main" alt="Logo">
+<div id="main-view" class="container">
+    <img src="https://healthy-fare.vercel.app/logo.png" class="main-logo" alt="Logo">
 
-    <p id="desc1" style="font-size: 1.1rem; color: #444;"></p>
+    <div id="desc-1" class="desc-text"></div>
 
-    <div class="media-box">
-        <div class="media-item" id="video-slot">ВИДЕО</div>
-        <div class="media-item" id="photo-slot">ФОТО</div>
+    <div class="media-group">
+        <div class="media-item">
+            <video width="100%" height="100%" controls><source src="video.mp4" type="video/mp4"></video>
+        </div>
+        <div class="media-item">
+            <img src="photo.jpg" style="width:100%; height:100%; object-fit: cover;">
+        </div>
     </div>
 
-    <p id="desc2" style="font-style: italic; color: #666;"></p>
+    <div id="desc-2" class="desc-text" style="font-weight: bold;"></div>
 
-    <hr style="border: 0; border-top: 1px solid #ddd; margin: 40px 0;">
-
-    <div class="sets-grid">
-        <div class="set-card" onclick="loadSet('weight-loss')">
-            <h3 id="set1-title"></h3>
-            <span style="color:var(--gold)">1200 kcal</span>
-        </div>
-        <div class="set-card" onclick="loadSet('balance')">
-            <h3 id="set2-title"></h3>
-            <span style="color:var(--gold)">1800 kcal</span>
-        </div>
-        <div class="set-card" onclick="loadSet('muscle')">
-            <h3 id="set3-title"></h3>
-            <span style="color:var(--gold)">2500 kcal</span>
-        </div>
+    <div id="sets-list">
+        <button class="set-selector" onclick="showMenu(1)">СЕТ 1</button>
+        <button class="set-selector" onclick="showMenu(2)">СЕТ 2</button>
+        <button class="set-selector" onclick="showMenu(3)">СЕТ 3</button>
     </div>
 </div>
 
+<div id="menu-view" class="container">
+    <button onclick="backToMain()" style="margin-bottom:20px;">⬅ Назад</button>
+    <h2 id="selected-set-title"></h2>
+    <div id="dishes-container"></div>
+</div>
+
 <script>
-    const translations = {
+    // ВСЕ ТЕКСТЫ ТУТ
+    const content = {
         ru: {
-            desc1: "Добро пожаловать в Healthy Fare. Мы готовим здоровую еду с доставкой.",
-            desc2: "Наши рационы разработаны лучшими диетологами региона.",
-            set1: "Снижение",
-            set2: "Баланс",
-            set3: "Набор"
+            d1: "ТВОЙ ТЕКСТ ОПИСАНИЯ 1 ИЗ ТЗ (ПРО ДАЛЬНОБОЙЩИКОВ)",
+            d2: "ТВОЙ ТЕКСТ ОПИСАНИЯ 2 ИЗ ТЗ (СУТЬ ПРОДАЖИ)",
+            s1: "СЕТ №1", s2: "СЕТ №2", s3: "СЕТ №3"
         },
         en: {
-            desc1: "Welcome to Healthy Fare. We provide healthy food delivery services.",
-            desc2: "Our rations are developed by the region's top nutritionists.",
-            set1: "Loss",
-            set2: "Balance",
-            set3: "Gain"
+            d1: "YOUR DESCRIPTION 1 IN ENGLISH",
+            d2: "YOUR DESCRIPTION 2 IN ENGLISH",
+            s1: "SET #1", s2: "SET #2", s3: "SET #3"
         }
     };
 
-    function setLang(lang) {
-        document.getElementById('desc1').innerText = translations[lang].desc1;
-        document.getElementById('desc2').innerText = translations[lang].desc2;
-        document.getElementById('set1-title').innerText = translations[lang].set1;
-        document.getElementById('set2-title').innerText = translations[lang].set2;
-        document.getElementById('set3-title').innerText = translations[lang].set3;
-        localStorage.setItem('preferredLang', lang);
+    let currentLang = 'ru';
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        document.getElementById('desc-1').innerText = content[lang].d1;
+        document.getElementById('desc-2').innerText = content[lang].d2;
+        const buttons = document.querySelectorAll('.set-selector');
+        buttons[0].innerText = content[lang].s1;
+        buttons[1].innerText = content[lang].s2;
+        buttons[2].innerText = content[lang].s3;
     }
 
-    // Инициализация при загрузке
-    setLang(localStorage.getItem('preferredLang') || 'ru');
+    function showMenu(setNum) {
+        document.getElementById('main-view').style.display = 'none';
+        document.getElementById('menu-view').style.display = 'block';
+        document.getElementById('selected-set-title').innerText = content[currentLang]['s' + setNum];
+        // Тут будет fetch из Supabase с фильтром по номеру сета
+    }
+
+    function backToMain() {
+        document.getElementById('main-view').style.display = 'block';
+        document.getElementById('menu-view').style.display = 'none';
+    }
 
     function openAdmin() {
-        const pass = prompt("Введите пароль админа:");
-        if(pass === "123") alert("Доступ разрешен");
+        if(prompt("Пароль:") === "123") { window.location.href = "/admin"; }
     }
 
-    function loadSet(type) {
-        alert("Загружаем сет: " + type + ". Тут мы подключим Supabase.");
-    }
+    // Старт
+    setLanguage('ru');
 </script>
 
 </body>
