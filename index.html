@@ -1,40 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Healthy Fare</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #F8F7F4; color: #037C36; font-family: sans-serif; text-align: center; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; margin: 10px; display: inline-block; width: 250px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #037C36; font-size: 2.5rem; margin-top: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 30px auto; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: left; }
+        .price { color: #C99100; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
     <h1>HEALTHY FARE</h1>
-    <div id="menu">Загрузка...</div>
+    <div id="menu" class="grid">Загрузка...</div>
 
-        <script>
-        const _supabase = supabase.createClient('https://xjhrlwmwbjkrkengmlbn.supabase.co', 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqaHJsd213YmprcmtlbmdtbGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxODIxMDUsImV4cCI6MjA5MDc1ODEwNX0.Ciff-5g3VuASwa4fKdMIsccCvgFVYhxGRk9szwvMtyA');
-        async function loadMenu() {
-            try {
-                const { data, error } = await _supabase.from('dishes').select('*');
-                if (error) throw error;
-                
-                const container = document.getElementById('menu');
-                if (!data || data.length === 0) {
-                    container.innerHTML = 'В таблице пока нет блюд';
-                    return;
-                }
+    <script>
+        // Ключ исправлен: начинается с маленькой e
+        const client = supabase.createClient(
+            'https://xjhrlwmwbjkrkengmlbn.supabase.co', 
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqaHJsd213YmprcmtlbmdtbGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxODIxMDUsImV4cCI6MjA5MDc1ODEwNX0.Ciff-5g3VuASwa4fKdMIsccCvgFVYhxGRk9szwvMtyA'
+        );
 
-                container.innerHTML = data.map(d => `
-                    <div class="card">
-                        <h3>${d.title_ru || 'Без названия'}</h3>
-                        <p>${d.price ? d.price + ' AED' : 'Цена не указана'}</p>
-                    </div>
-                `).join('');
-            } catch (err) {
-                document.getElementById('menu').innerHTML = 'Ошибка: ' + err.message;
+        async function getMenu() {
+            const { data, error } = await client.from('dishes').select('*');
+            if (error) {
+                document.getElementById('menu').innerHTML = 'Ошибка: ' + error.message;
+                return;
             }
+            if (!data || data.length === 0) {
+                document.getElementById('menu').innerHTML = 'База данных пуста';
+                return;
+            }
+            document.getElementById('menu').innerHTML = data.map(item => `
+                <div class="card">
+                    <h3>${item.title_ru || 'Без названия'}</h3>
+                    <div class="price">${item.price || '0'} AED</div>
+                </div>
+            `).join('');
         }
-        loadMenu();
+        getMenu();
     </script>
+</body>
+</html>
